@@ -619,6 +619,11 @@ public class DataSet implements org.nd4j.linalg.dataset.api.DataSet {
     public SplitTestAndTrain splitTestAndTrain(int numHoldout, Random rng) {
         if (numHoldout >= numExamples())
             throw new IllegalArgumentException("Unable to split on size larger than the number of rows");
+        
+        // shuffle before split
+        Nd4j.shuffle(getFeatureMatrix(),rng,1);
+        Nd4j.shuffle(getLabels(),rng,1);    
+            
         DataSet first = new DataSet(getFeatureMatrix().get(NDArrayIndex.interval(0,numHoldout)),getLabels().get(NDArrayIndex.interval(0,numHoldout)));
         DataSet second = new DataSet(getFeatureMatrix().get(NDArrayIndex.interval(numHoldout,numExamples())),getLabels().get(NDArrayIndex.interval(numHoldout,numExamples())));
         return new SplitTestAndTrain(first, second);
@@ -626,7 +631,12 @@ public class DataSet implements org.nd4j.linalg.dataset.api.DataSet {
 
     @Override
     public SplitTestAndTrain splitTestAndTrain(int numHoldout) {
-        return splitTestAndTrain(numHoldout, new Random());
+        if (numHoldout >= numExamples())
+            throw new IllegalArgumentException("Unable to split on size larger than the number of rows");
+        
+        DataSet first = new DataSet(getFeatureMatrix().get(NDArrayIndex.interval(0,numHoldout)),getLabels().get(NDArrayIndex.interval(0,numHoldout)));
+        DataSet second = new DataSet(getFeatureMatrix().get(NDArrayIndex.interval(numHoldout,numExamples())),getLabels().get(NDArrayIndex.interval(numHoldout,numExamples())));
+        return new SplitTestAndTrain(first, second);
     }
 
 
